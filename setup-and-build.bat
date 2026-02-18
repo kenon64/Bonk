@@ -9,28 +9,65 @@ setlocal enabledelayedexpansion
 
 echo.
 echo ╔════════════════════════════════════════════════════════════╗
-echo ║  BONK - Audio to MIDI Converter - Setup & Build (Windows)  ║
+echo ║  BONK - Audio to MIDI Converter - Setup ^& Build (Windows)  ║
 echo ║  Установка зависимостей и компиляция в exe                ║
 echo ╚════════════════════════════════════════════════════════════╝
 echo.
 
 REM Проверка Python
 echo [1/5] Проверка Python...
+set PYTHON_CMD=
+set PYTHON_VERSION=
+
+REM Сначала пробуем python
 python --version >nul 2>&1
-if errorlevel 1 (
-    echo ❌ Ошибка: Python не установлен или не добавлен в PATH
-    echo    Пожалуйста, установите Python 3.8+ с https://www.python.org
-    echo    При установке выберите опцию "Add Python to PATH"
+if errorlevel 0 (
+    set PYTHON_CMD=python
+    for /f "tokens=*" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
+)
+
+REM Если python не сработал, пробуем python3
+if "!PYTHON_CMD!"=="" (
+    python3 --version >nul 2>&1
+    if errorlevel 0 (
+        set PYTHON_CMD=python3
+        for /f "tokens=*" %%i in ('python3 --version 2^>^&1') do set PYTHON_VERSION=%%i
+    )
+)
+
+REM Если всё равно не найдено, пробуем по пути AppData
+if "!PYTHON_CMD!"=="" (
+    if exist "%APPDATA%\..\Local\Programs\Python\Python311\python.exe" (
+        set PYTHON_CMD=%APPDATA%\..\Local\Programs\Python\Python311\python.exe
+        for /f "tokens=*" %%i in ('!PYTHON_CMD! --version 2^>^&1') do set PYTHON_VERSION=%%i
+    )
+)
+
+if "!PYTHON_CMD!"=="" (
+    echo ❌ Ошибка: Python не найден!
+    echo.
+    echo Решение:
+    echo   1. Установите Python 3.8+ с https://www.python.org
+    echo   2. При установке ОБЯЗАТЕЛЬНО выберите "Add Python to PATH"
+    echo   3. Перезагрузите компьютер после установки
+    echo   4. Откройте новое окно Command Prompt и запустите этот скрипт снова
+    echo.
+    echo Проверка:
+    echo   - Откройте Command Prompt
+    echo   - Введите: python --version
+    echo   - Если Python найден, вы увидите версию
+    echo.
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('python --version') do set PYTHON_VERSION=%%i
-echo ✓ Найден %PYTHON_VERSION%
+
+echo ✓ Найден !PYTHON_VERSION!
+echo   Использую: !PYTHON_CMD!
 echo.
 
 REM Обновление pip
 echo [2/5] Обновление pip...
-python -m pip install --upgrade pip setuptools wheel
+!PYTHON_CMD! -m pip install --upgrade pip setuptools wheel
 if errorlevel 1 (
     echo ❌ Ошибка при обновлении pip
     pause
@@ -41,7 +78,7 @@ echo.
 
 REM Установка зависимостей
 echo [3/5] Установка зависимостей (это может занять несколько минут)...
-pip install -r requirements.txt
+!PYTHON_CMD! -m pip install -r requirements.txt
 if errorlevel 1 (
     echo ❌ Ошибка при установке зависимостей
     pause
@@ -52,14 +89,14 @@ echo.
 
 REM Проверка что PyInstaller установлен
 echo [4/5] Проверка PyInstaller...
-pyinstaller --version >nul 2>&1
+!PYTHON_CMD! -m PyInstaller --version >nul 2>&1
 if errorlevel 1 (
     echo ❌ Ошибка: PyInstaller не установлен
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('pyinstaller --version') do set PYINSTALLER_VERSION=%%i
-echo ✓ PyInstaller %PYINSTALLER_VERSION% найден
+for /f "tokens=*" %%i in ('!PYTHON_CMD! -m PyInstaller --version 2^>^&1') do set PYINSTALLER_VERSION=%%i
+echo ✓ PyInstaller !PYINSTALLER_VERSION! найден
 echo.
 
 REM Компиляция в exe
@@ -68,10 +105,9 @@ echo      (это может занять 2-5 минут, пожалуйста �
 echo.
 
 if exist "bonk.spec" (
-    pyinstaller bonk.spec
+    !PYTHON_CMD! -m PyInstaller bonk.spec
 ) else (
-    pyinstaller --onefile --windowed --icon=./bonk/assets/icon.ico ^
-                --name bonk --distpath ./dist --buildpath ./build ^
+    !PYTHON_CMD! -m PyInstaller --onefile --name bonk --distpath ./dist --buildpath ./build ^
                 --spec-path ./ bonk/__main__.py
 )
 
