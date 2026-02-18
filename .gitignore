@@ -1,0 +1,59 @@
+# .gitignore для Bonk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Виртуальное окружение
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Тестирование
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Аудио и MIDI файлы (примеры)
+examples/audio/
+examples/output/
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.mid
+*.midi
+
+# Логи
+*.log

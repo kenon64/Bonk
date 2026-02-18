@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bonk"
+version = "1.0.0"
+description = "Audio to MIDI converter - преобразование аудиофайлов в нотную запись"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Bonk Team"}
+]
+
+dependencies = [
+    "librosa>=0.10.0",
+    "numpy>=1.24.0",
+    "scipy>=1.11.0",
+    "pretty_midi>=0.2.10",
+    "soundfile>=0.12.1",
+    "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+bonk = "bonk.cli:cli"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
